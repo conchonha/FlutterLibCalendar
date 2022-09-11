@@ -19,9 +19,9 @@ class _SizerUtilsState extends State<SizerUtils> {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context,boxConstraints)=>
-      OrientationBuilder(builder: (ct,orientation){
-        SizerModule.setSizeScreen(MediaQuery.of(ct).size, orientation);
-        return widget.builder.call(ct,orientation,SizerModule.deviceType);
+      OrientationBuilder(builder: (context,orientation){
+        SizerModule.setSizeScreen(MediaQuery.of(context).size, orientation);
+        return widget.builder.call(context,orientation,SizerModule.deviceType);
       })
     );
   }

@@ -4,29 +4,38 @@ import 'package:flutter_lib_calendar/resource/app_dimens.dart';
 import 'package:flutter_lib_calendar/resource/app_title.dart';
 import 'package:flutter_lib_calendar/sizer_module/sizer_module.dart';
 import 'package:flutter_lib_calendar/sizer_module/sizer_widget.dart';
-import 'package:flutter_lib_calendar/utils/const.dart';
+import 'package:provider/provider.dart';
 
 import '../../resource/app_color.dart';
 import '../../resource/app_style.dart';
+import '../../viewmodel/calendar_viewmodel.dart';
 
 typedef listDropDown = List<String> Function(String? value);
 
-class HeaderPlanning extends StatelessWidget {
-  HeaderPlanning(
+class HeaderPlanning extends StatefulWidget {
+  final listDropDown listDropCalendar;
+  final listDropDown listDropFilter;
+  final Function(String) onChangeSearch;
+
+  const HeaderPlanning(
       {Key? key,
       required this.listDropCalendar,
       required this.listDropFilter,
       required this.onChangeSearch})
       : super(key: key);
-  final listDropDown listDropCalendar;
-  final listDropDown listDropFilter;
-  final Function(String) onChangeSearch;
 
-  final TextEditingController _textController = TextEditingController();
+  @override
+  State<HeaderPlanning> createState() => _HeaderPlanningState();
+}
+
+class _HeaderPlanningState extends State<HeaderPlanning> {
   final globalKey = GlobalKey();
+  late CalendarViewModel viewModel;
 
   @override
   Widget build(BuildContext context) {
+    viewModel = Provider.of<CalendarViewModel>(context, listen: true);
+
     return SizerUtils(
       key: globalKey,
       builder: (context, orientation, deviceType) => Container(
@@ -43,10 +52,12 @@ class HeaderPlanning extends StatelessWidget {
               children: [
                 SizedBox(
                     width: AppDP.dp_110,
-                    child: _dropDowItem(AppTitle.VIEW, listDropCalendar)),
+                    child: _dropDowItem(AppTitle.VIEW, widget.listDropCalendar,
+                        viewModel.textDropCalendar)),
                 SizedBox(
                     width: AppDP.dp_110,
-                    child: _dropDowItem(AppTitle.FiLTER, listDropFilter))
+                    child: _dropDowItem(AppTitle.FiLTER, widget.listDropFilter,
+                        viewModel.textFilter))
               ],
             ),
             Expanded(
@@ -60,7 +71,6 @@ class HeaderPlanning extends StatelessWidget {
                 child: TextField(
                   autofocus: false,
                   textAlignVertical: TextAlignVertical.center,
-                  controller: _textController,
                   keyboardType: TextInputType.name,
                   style: Theme.of(widgetKeyMain.currentContext!)
                       .textTheme
@@ -88,7 +98,9 @@ class HeaderPlanning extends StatelessWidget {
     );
   }
 
-  Widget _dropDowItem(String firstText, listDropDown listItem) => Row(
+  Widget _dropDowItem(
+          String firstText, listDropDown listItem, String? textDrop) =>
+      Row(
         children: [
           Padding(
             padding: const EdgeInsets.only(right: AppDP.dp_5),
@@ -101,7 +113,7 @@ class HeaderPlanning extends StatelessWidget {
           Expanded(
               child: DropdownButton<String>(
             alignment: Alignment.topRight,
-            value: listItem(null)[Constant.ZERO],
+            value: textDrop,
             icon: const Icon(
               Icons.arrow_drop_down,
               size: AppDP.dp_12,

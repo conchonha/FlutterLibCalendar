@@ -41,9 +41,9 @@ class LeftEventWidget extends StatelessWidget {
     );
   }
 
-  Widget _titleOfList(int type) {
+  Flexible _titleOfList(int type) {
     final checkType = type == Constant.UPCOMMING_TYPE;
-    return Flexible(
+    return  Flexible(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,19 +68,19 @@ class LeftEventWidget extends StatelessWidget {
                     checkType
                         ? const SizedBox.shrink()
                         : Container(
-                            width: AppDP.dp_5,
-                            height: AppDP.dp_5,
-                            decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppColor.h00cccc),
-                          ),
+                      width: AppDP.dp_5,
+                      height: AppDP.dp_5,
+                      decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColor.h00cccc),
+                    ),
                     Expanded(
                         child: Container(
-                      width: double.infinity,
-                      height: AppDP.dp_1,
-                      color:
+                          width: double.infinity,
+                          height: AppDP.dp_1,
+                          color:
                           Theme.of(widgetKeyMain.currentContext!).dividerColor,
-                    )),
+                        )),
                     Icon(
                       checkType
                           ? Icons.calendar_month_sharp
@@ -93,9 +93,11 @@ class LeftEventWidget extends StatelessWidget {
               )
             ],
           ),
-          Consumer<CalendarViewModel>(
-              builder: (context, vm, child) =>
-                  checkType ? _listUpComing(vm) : _listDoctor(vm)),
+          Flexible(
+            child: Consumer<CalendarViewModel>(
+                builder: (context, vm, child) =>
+                checkType ? _listUpComing(vm) : _listDoctor(vm)),
+          ),
           checkType ? _note : const SizedBox.shrink()
         ],
       ),
@@ -120,10 +122,11 @@ class LeftEventWidget extends StatelessWidget {
             horizontal: AppDP.dp_5, vertical: AppDP.dp_15),
         child: ListView(
           shrinkWrap: true,
+          scrollDirection: Axis.vertical,
           children: _controller
               .eventsOnTheDay(_controller.currentDateTime!)
               .map((e) => CommonListItem<CalendarEvent>(
-                  commonData: e, iAction: vm.eventUpComing))
+              commonData: e, iAction: vm.eventUpComing))
               .toList(),
         ),
       );

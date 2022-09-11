@@ -7,12 +7,12 @@ import '../resource/app_style.dart';
 import '../model/sample_event.dart';
 
 class CalendarPage extends StatelessWidget {
-  const CalendarPage({Key? key}) : super(key: key);
+  CalendarPage({Key? key,required this.cellCalendarPageController}) : super(key: key);
+  CellCalendarPageController? cellCalendarPageController;
 
   @override
   Widget build(BuildContext context) {
     final _sampleEvents = sampleEvents();
-    final cellCalendarPageController = CellCalendarPageController();
     return Container(
       color: Colors.white,
       child: OrientationBuilder(

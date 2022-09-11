@@ -1,5 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter_lib_calendar/calendar_module/components/type_date/mode_date.dart';
+import 'package:flutter_lib_calendar/model/sample_event.dart';
+import 'package:flutter_lib_calendar/utils/const.dart';
+import 'package:flutter_lib_calendar/viewmodel/calendar_viewmodel.dart';
 import 'package:provider/provider.dart';
 
 import 'calendar_event.dart';
@@ -11,7 +16,6 @@ import 'controllers/cell_calendar_page_controller.dart';
 import 'date_extension.dart';
 
 typedef daysBuilder = Widget Function(int dayIndex);
-
 
 /// Calendar widget like a Google Calendar
 ///
@@ -56,24 +60,27 @@ class _CalendarPageView extends StatelessWidget {
   );
 
   final daysBuilder? daysOfTheWeekBuilder;
-  late  CellCalendarPageController? cellCalendarPageController;
+  late CellCalendarPageController? cellCalendarPageController;
+  late CalendarViewModel _calendarViewModel;
+  late CalendarStateController _calendarStateControl;
 
   @override
   Widget build(BuildContext context) {
-    final calendarStateControl = Provider.of<CalendarStateController>(context,listen: false);
+    _calendarStateControl =
+        Provider.of<CalendarStateController>(context, listen: true);
+    _calendarViewModel = Provider.of<CalendarViewModel>(context, listen: true);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        MonthYearLabel(cellCalendarPageController ?? CellCalendarPageController()),
+        MonthYearLabel(
+            cellCalendarPageController ?? CellCalendarPageController()),
         Expanded(
           child: PageView.builder(
-            controller: cellCalendarPageController ??= CellCalendarPageController(),
+            controller: cellCalendarPageController ??=
+                CellCalendarPageController(),
             itemBuilder: (context, index) {
-              calendarStateControl.setIndex(index);
-              return _CalendarPage(
-                index.visibleDateTime,
-                daysOfTheWeekBuilder,
-              );
+              return _filterWidget(index);
             },
             onPageChanged: (index) {
               Provider.of<CalendarStateController>(context, listen: false)
@@ -84,6 +91,21 @@ class _CalendarPageView extends StatelessWidget {
       ],
     );
   }
+
+  Widget _filterWidget(int index) {
+    if (_calendarViewModel.textFilter == listFilter[Constant.ZERO]) {
+      _calendarStateControl.setModeType(ModeType.MODE_MONTH);
+      return _CalendarPage(
+        index.visibleDateTime,
+        daysOfTheWeekBuilder,
+      );
+    } else if (_calendarViewModel.textFilter == listFilter[Constant.ONE]) {
+      _calendarStateControl.setModeType(ModeType.MODE_DAY);
+      return const ModeDate();
+    }
+    _calendarStateControl.setModeType(ModeType.MODE_WEEK_DAY);
+    return Container();
+  }
 }
 
 /// Page of [_CalendarPage]
@@ -92,8 +114,7 @@ class _CalendarPageView extends StatelessWidget {
 class _CalendarPage extends StatelessWidget {
   const _CalendarPage(
     this.visiblePageDate,
-    this.daysOfTheWeekBuilder,
-   {
+    this.daysOfTheWeekBuilder, {
     Key? key,
   }) : super(key: key);
 
@@ -119,7 +140,8 @@ class _CalendarPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final days = _getCurrentDays(visiblePageDate);
     return LayoutBuilder(
-      builder: (ct, bx) => OrientationBuilder(builder: (ct,or) => Column(
+      builder: (ct, bx) => OrientationBuilder(
+        builder: (ct, or) => Column(
           children: [
             DaysOfTheWeek(daysOfTheWeekBuilder),
             Expanded(

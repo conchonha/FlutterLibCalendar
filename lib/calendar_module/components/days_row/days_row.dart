@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_lib_calendar/resource/app_color.dart';
 import 'package:flutter_lib_calendar/resource/app_dimens.dart';
+import 'package:flutter_lib_calendar/utils/extension.dart';
 import 'package:provider/provider.dart';
 
 import '../../controllers/calendar_state_controller.dart';
@@ -49,11 +50,12 @@ class _DayCell extends StatelessWidget {
       },
       child: DecoratedBox(
         decoration: BoxDecoration(
-            border: Border.all(
-                color: _checkDate(provide.currentDateTime)
-                    ? AppColor.h00cccc
-                    : Theme.of(context).dividerColor,
-                width: AppDP.dp_0_7),
+          color: Colors.grey.checkDateTime(date,color: Colors.white),
+          border: Border.all(
+              color: _checkDate(provide.currentDateTime)
+                  ? AppColor.h00cccc
+                  : Theme.of(context).dividerColor,
+              width: AppDP.dp_0_7),
         ),
         child: MeasureSize(
           onChange: (size) {

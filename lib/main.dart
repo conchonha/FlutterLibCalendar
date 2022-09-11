@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lib_calendar/calendar_module/controllers/cell_calendar_page_controller.dart';
 import 'package:flutter_lib_calendar/model/sample_event.dart';
 import 'package:flutter_lib_calendar/resource/app_color.dart';
 import 'package:flutter_lib_calendar/resource/app_dimens.dart';
@@ -11,12 +12,12 @@ import 'package:provider/provider.dart';
 import 'calendar_module/controllers/calendar_state_controller.dart';
 import 'calendar_module/controllers/cell_height_controller.dart';
 
-void main() {
+void main(){
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
 
 final widgetKeyMain = GlobalKey();
-final _sampleEvents = sampleEvents();
 
 class MyApp extends StatelessWidget {
   @override
@@ -46,7 +47,6 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(
             create: (_) => CalendarStateController(
               events: sampleEvents(),
-              onPageChangedFromUserArgument: null,
             ),
           ),
           ChangeNotifierProvider(
@@ -56,17 +56,23 @@ class MyApp extends StatelessWidget {
             create: (_) => CalendarViewModel(),
           )
         ],
-        child: const HomePage(),
+        child: HomePage(),
       ),
     );
   }
 }
 
+
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  HomePage({Key? key}) : super(key: key);
+
+  final CellCalendarPageController _pageController = CellCalendarPageController();
+  late CalendarViewModel _viewModel;
 
   @override
   Widget build(BuildContext context) {
+    _viewModel = Provider.of<CalendarViewModel>(context, listen: false);
+
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.grey.shade300,
@@ -74,25 +80,30 @@ class HomePage extends StatelessWidget {
           children: [
             HeaderPlanning(
               listDropCalendar: (valueChange) {
-                //todo something
+                _viewModel.setTextDropCalendar = valueChange;
                 return listDropDow;
               },
               listDropFilter: (valueChange) {
-                //todo something
+                _viewModel.setTextFilter = valueChange;
                 return listFilter;
               },
               onChangeSearch: (value) {},
             ),
             Expanded(
                 child: Row(
-              children: [
-                Flexible(fit: FlexFit.tight, flex: 2, child: LeftEventWidget()),
-                const Flexible(flex: 8, child: CalendarPage())
-              ],
-            ))
+                  children: [
+                    Flexible(fit: FlexFit.tight, flex: 2, child: LeftEventWidget()),
+                    Flexible(
+                        flex: 8,
+                        child: CalendarPage(
+                          cellCalendarPageController: _pageController,
+                        ))
+                  ],
+                ))
           ],
         ),
       ),
     );
   }
 }
+

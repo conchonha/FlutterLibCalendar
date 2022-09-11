@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lib_calendar/resource/app_color.dart';
 import 'package:flutter_lib_calendar/resource/app_dimens.dart';
 import 'package:flutter_lib_calendar/utils/const.dart';
+import 'package:flutter_lib_calendar/utils/extension.dart';
 import 'package:provider/provider.dart';
 
 import '../../../resource/app_style.dart';
@@ -25,6 +26,7 @@ class EventLabels extends StatelessWidget {
   final DateTime date;
   CellHeightController? provide;
   bool check = false;
+  final DateTime _today = DateTime.now();
 
   List<CalendarEvent> _eventsOnTheDay(
       DateTime date, List<CalendarEvent> events) {
@@ -114,8 +116,9 @@ class EventLabels extends StatelessWidget {
           ),
           Expanded(
               child: autoTextSize(event.eventName,
-                  textStyle: const TextStyle(
-                      fontSize: AppSP.sp_11, color: AppColor.h00cccc)))
+                  textStyle: TextStyle(
+                      fontSize: AppSP.sp_11,
+                      color: Colors.grey.checkDateTime(date,color: AppColor.h00cccc,alpha: 0.7))))
         ],
       ),
     ));
@@ -144,9 +147,8 @@ class _DayLabel extends StatelessWidget {
           textAlign: TextAlign.start,
           date.day.toString(),
           textStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: isCurrentDate ? AppColor.h00cccc : Colors.grey,
-                fontWeight: isCurrentDate? FontWeight.bold : FontWeight.w400
-              )),
+              color: isCurrentDate ? AppColor.h00cccc : Colors.grey,
+              fontWeight: isCurrentDate ? FontWeight.bold : FontWeight.w400)),
     );
   }
 }

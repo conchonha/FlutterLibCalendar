@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
@@ -11,47 +10,71 @@ import '../date_extension.dart';
 class CalendarStateController extends ChangeNotifier {
   CalendarStateController({
     required this.events,
-    required this.onPageChangedFromUserArgument,
   }) {
-    this._initialize();
+    _initialize();
   }
+
   final List<CalendarEvent> events;
   DateTime? currentDateTime;
 
+  // check user chose DayCell on, _currentTimeOfPage save location user chose, when onPageChange will get value from hashmap
   int _index = -1;
   bool _checkTimeOfPage = true;
-  final HashMap<int,DateTime?> currentTimeOfPage = HashMap<int,DateTime>();
+  final HashMap<int, DateTime?> _currentTimeOfPage = HashMap<int, DateTime>();
 
-  final Function(DateTime firstDate, DateTime lastDate)?
-      onPageChangedFromUserArgument;
+  //default index of page Calendar => 1200
+  int _defaultIndex = initialPageIndex;
 
-  void setIndex(int index){
-    _index = index;
-    if(_checkTimeOfPage){
-      currentTimeOfPage[_index] = currentDateTime;
-      _checkTimeOfPage = false;
+  //type filter [Year,Month,Date]
+  ModeType _modeType = ModeType.MODE_MONTH;
+
+  //set type filter [Year,Month,Date]
+  void setModeType(ModeType modeType){
+    _modeType = modeType;
+  }
+
+  //when type = Mode Date, screen will display all event of date, setCurrentDateTimeTypeDate will set value for currentDateTime
+  void _setCurrentDateTimeTypeDate() {
+    if (_index == _defaultIndex) {
+      debugPrint("SangTB bawng: $_index");
+      currentDateTime = DateTime.now();
+    } else if (_index < _defaultIndex) {
+      debugPrint("SangTB nho hon: $_index");
+      _plushOrMinus(_index, false);
+    } else {
+      debugPrint("SangTB lon hon: $_index");
+      _plushOrMinus(_index, true);
     }
+  }
+
+  //calculate base on index of Page => CurrentDateTime of Mode Day
+  void _plushOrMinus(int index, bool plush) {
+    _defaultIndex = index;
+    var tmp = currentDateTime;
+    var day = plush ? tmp!.day + 1 : tmp!.day - 1;
+    currentDateTime = DateTime(tmp.year, tmp.month, day);
   }
 
   void _initialize() {
     currentDateTime = DateTime.now();
+
+    _index = initialPageIndex;
+    if (_checkTimeOfPage) {
+      _currentTimeOfPage[_index] = currentDateTime;
+      _checkTimeOfPage = false;
+    }
+
     notifyListeners();
   }
 
   void onPageChanged(int index) {
-    currentDateTime = currentTimeOfPage[index] ?? index.visibleDateTime;
-
-    if (onPageChangedFromUserArgument != null) {
-      final currentFirstDate = _getFirstDay(currentDateTime!);
-      onPageChangedFromUserArgument!(
-          currentFirstDate, currentFirstDate.add(Duration(days: 41)));
+    _index = index;
+    if(_modeType == ModeType.MODE_MONTH){
+      currentDateTime = _currentTimeOfPage[index] ?? index.visibleDateTime;
+    }else{
+      _setCurrentDateTimeTypeDate();
     }
     notifyListeners();
-  }
-
-  DateTime _getFirstDay(DateTime dateTime) {
-    final firstDayOfTheMonth = DateTime(dateTime.year, dateTime.month, 1);
-    return firstDayOfTheMonth.add(firstDayOfTheMonth.weekday.daysDuration);
   }
 
   List<CalendarEvent> eventsOnTheDay(DateTime date) {
@@ -65,8 +88,14 @@ class CalendarStateController extends ChangeNotifier {
   }
 
   void onCellTapped(DateTime date) {
-    currentTimeOfPage[_index] = date;
+    _currentTimeOfPage[_index] = date;
     currentDateTime = date;
     notifyListeners();
   }
+}
+
+enum ModeType{
+  MODE_MONTH,
+  MODE_DAY,
+  MODE_WEEK_DAY
 }
